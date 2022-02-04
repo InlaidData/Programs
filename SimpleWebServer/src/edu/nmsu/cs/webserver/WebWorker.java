@@ -28,12 +28,24 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.text.DateFormat;
 import java.util.Date;
+import java.text.SimpleDateFormat;
 import java.util.TimeZone;
+import java.util.Scanner;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 public class WebWorker implements Runnable
 {
 
 	private Socket socket;
+	private String filePath;
+	Date currentDate = new Date();
+	SimpleDateFormat formatter = new SimpleDateFormat("mm-dd-yyyy");
+	Scanner myFileHandler;
+	String[] replaceTagList = {"<cs371date>", "<cs371server>"};
+	String[] targetPhraseList = {formatter.format(currentDate), "Dane's CS 371 Server!"};
+	
 
 	/**
 	 * Constructor: must have a valid open socket
@@ -42,6 +54,19 @@ public class WebWorker implements Runnable
 	{
 		socket = s;
 	}
+
+	public String findTagAndReplace(String input){
+		if (input == null)
+			return null;
+
+		String output = input;
+
+		for (int i = 0; i < replaceTagList.length; i++){
+			if(input.indexOf(replaceTagList[i]) != -1)
+				output = input.replace(replaceTagList[i], targetPhraseList[i]);
+		}//end for
+		return output;
+	}//end method
 
 	/**
 	 * Worker thread starting point. Each worker handles just one HTTP request and then returns, which
@@ -55,6 +80,7 @@ public class WebWorker implements Runnable
 		{
 			InputStream is = socket.getInputStream();
 			OutputStream os = socket.getOutputStream();
+			//Next three lines is where all the work for this assignment happens.
 			readHTTPRequest(is);
 			writeHTTPHeader(os, "text/html");
 			writeContent(os);
@@ -75,6 +101,7 @@ public class WebWorker implements Runnable
 	private void readHTTPRequest(InputStream is)
 	{
 		String line;
+		boolean flag = false;
 		BufferedReader r = new BufferedReader(new InputStreamReader(is));
 		while (true)
 		{
@@ -83,7 +110,13 @@ public class WebWorker implements Runnable
 				while (!r.ready())
 					Thread.sleep(1);
 				line = r.readLine();
-				System.err.println("Request line: (" + line + ")");
+				if (!flag){
+					filePath = "C:/NMSU/CS 371 Software Development/Programs/SimpleWebServer/bin/edu/nmsu/cs/webserver" + line.substring(line.indexOf(' ') + 1,line.lastIndexOf(' '));
+					flag = true;
+					System.out.println(filePath);
+				}
+
+				System.err.println("Request line: (" + line + ")");//request line 1 recieves whatever is typed into the web browser. //these lines will be useful for assignment.
 				if (line.length() == 0)
 					break;
 			}
@@ -107,9 +140,20 @@ public class WebWorker implements Runnable
 	private void writeHTTPHeader(OutputStream os, String contentType) throws Exception
 	{
 		Date d = new Date();
+		boolean fileFound = true;
 		DateFormat df = DateFormat.getDateTimeInstance();
 		df.setTimeZone(TimeZone.getTimeZone("GMT"));
-		os.write("HTTP/1.1 200 OK\n".getBytes());
+		try {
+			myFileHandler = new Scanner(new File(filePath));
+		} catch (FileNotFoundException e){
+			fileFound = false;
+			myFileHandler = new Scanner(new File("C:/NMSU/CS 371 Software Development/Programs/SimpleWebServer/bin/edu/nmsu/cs/webserver/res/acc/PageNotFound.html"));
+		}
+		if(fileFound)
+			os.write("HTTP/1.1 200 OK\n".getBytes()); //Our code should 404 not found if the browser requests something that doesn't exist.
+		else 
+			os.write("HTTP/1.1 404 File Not Found\n".getBytes());
+
 		os.write("Date: ".getBytes());
 		os.write((df.format(d)).getBytes());
 		os.write("\n".getBytes());
@@ -117,7 +161,7 @@ public class WebWorker implements Runnable
 		// os.write("Last-Modified: Wed, 08 Jan 2003 23:11:55 GMT\n".getBytes());
 		// os.write("Content-Length: 438\n".getBytes());
 		os.write("Connection: close\n".getBytes());
-		os.write("Content-Type: ".getBytes());
+		os.write("Content-Type: ".getBytes()); // this is the type of content we want the browser to interpret. 
 		os.write(contentType.getBytes());
 		os.write("\n\n".getBytes()); // HTTP header ends with 2 newlines
 		return;
@@ -132,9 +176,18 @@ public class WebWorker implements Runnable
 	 **/
 	private void writeContent(OutputStream os) throws Exception
 	{
-		os.write("<html><head></head><body>\n".getBytes());
+		String unparsedLine = new String("");
+		while(myFileHandler.hasNextLine()) {
+			unparsedLine = myFileHandler.nextLine();
+			System.out.println(unparsedLine);
+			System.out.println(findTagAndReplace(unparsedLine));
+
+			os.write((findTagAndReplace(unparsedLine) + "\n").getBytes());
+		 }
+
+		/*os.write("<html><head></head><body>\n".getBytes());
 		os.write("<h3>My web server works!</h3>\n".getBytes());
-		os.write("</body></html>\n".getBytes());
+		os.write("</body></html>\n".getBytes()); */
 	}
 
 } // end class
