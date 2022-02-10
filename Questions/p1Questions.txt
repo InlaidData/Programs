@@ -1,0 +1,7 @@
+1. 6 hours
+2. Thought/Design: 3 hours
+   Programming: 5 hours
+   Debugging: 1.5 hours
+   Total: 9.5 Hours
+3. 9.5 - 6 = 3.5
+   3.5/9.5 = 36.8%

@@ -1,1 +1,11 @@
-ECHO is on.
+<project default="all">
+	<target name="all">
+		<javac destdir="C:\NMSU\CS 371 Software Development\Programs\SimpleWebServer\bin" srcdir="C:\NMSU\CS 371 Software Development\Programs\SimpleWebServer\src" includes="edu\nmsu\cs\webserver\WebWorker.java"/>
+		<javac srcdir="C:\NMSU\CS 371 Software Development\Programs\SimpleWebServer\src" destdir="C:\NMSU\CS 371 Software Development\Programs\SimpleWebServer\bin" includes="edu\nmsu\cs\webserver\WebServer.java"/>
+	</target>
+	<target name="run">
+		<java classpath="C:\NMSU\CS 371 Software Development\Programs\SimpleWebServer\bin" classname="edu.nmsu.cs.webserver.WebServer">
+			<arg value="8080"/>
+		</java>
+	</target>
+</project>

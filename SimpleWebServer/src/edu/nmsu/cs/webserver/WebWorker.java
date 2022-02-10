@@ -111,7 +111,7 @@ public class WebWorker implements Runnable
 					Thread.sleep(1);
 				line = r.readLine();
 				if (!flag){
-					filePath = "C:/NMSU/CS 371 Software Development/Programs/SimpleWebServer/bin/edu/nmsu/cs/webserver" + line.substring(line.indexOf(' ') + 1,line.lastIndexOf(' '));
+					filePath = "C:/NMSU/CS 371 Software Development/Programs/SimpleWebServer" + line.substring(line.indexOf(' ') + 1,line.lastIndexOf(' '));
 					flag = true;
 					System.out.println(filePath);
 				}
@@ -147,7 +147,7 @@ public class WebWorker implements Runnable
 			myFileHandler = new Scanner(new File(filePath));
 		} catch (FileNotFoundException e){
 			fileFound = false;
-			myFileHandler = new Scanner(new File("C:/NMSU/CS 371 Software Development/Programs/SimpleWebServer/bin/edu/nmsu/cs/webserver/res/acc/PageNotFound.html"));
+			myFileHandler = new Scanner(new File("C:/NMSU/CS 371 Software Development/Programs/SimpleWebServer/res/acc/PageNotFound.html"));
 		}
 		if(fileFound)
 			os.write("HTTP/1.1 200 OK\n".getBytes()); //Our code should 404 not found if the browser requests something that doesn't exist.
