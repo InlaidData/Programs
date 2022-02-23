@@ -1,5 +1,7 @@
 package edu.nmsu.cs.webserver;
 
+//NOTE: The current working directory when using relative paths (./) is the directory you were in when you executed the java command.
+
 /**
  * Web worker: an object of this class executes in its own new thread to receive and respond to a
  * single HTTP request. After the constructor the object executes on its "run" method, and leaves
@@ -16,6 +18,9 @@ package edu.nmsu.cs.webserver;
  * request; it writes out an HTTP header to begin its response, and then it writes out some HTML
  * content for the response content. HTTP requests and responses are just lines of text (in a very
  * particular format).
+ // ./ means current working directory.
+
+ //C:/NMSU/CS 371 Software Development/Programs/SimpleWebServer/www
  * 
  * @author Jon Cook, Ph.D.
  *
@@ -32,19 +37,28 @@ import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 import java.util.Scanner;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class WebWorker implements Runnable
 {
 
+	//-----------------------------------Socket/Date/ Handling------------------------------
 	private Socket socket;
-	private String filePath;
 	Date currentDate = new Date();
 	SimpleDateFormat formatter = new SimpleDateFormat("mm-dd-yyyy");
-	Scanner myFileHandler;
+	
+	//-------------------------------------File Handling-------------------------------------
+	File foundFile;
+	FileInputStream myFileHandler;
+	long fileLength = 0;
+	private String filePath;
+
+	//------------------------------------String Processing----------------------------------
 	String[] replaceTagList = {"<cs371date>", "<cs371server>"};
 	String[] targetPhraseList = {formatter.format(currentDate), "Dane's CS 371 Server!"};
+	private String contentType = new String();
 	
 
 	/**
@@ -55,6 +69,8 @@ public class WebWorker implements Runnable
 		socket = s;
 	}
 
+	//Purpose: Finds a given tag listed in "replaceTagList" and replaces it with the corresponding "targetPhraseList"
+	//Parameters: input string to edit.
 	public String findTagAndReplace(String input){
 		if (input == null)
 			return null;
@@ -82,7 +98,8 @@ public class WebWorker implements Runnable
 			OutputStream os = socket.getOutputStream();
 			//Next three lines is where all the work for this assignment happens.
 			readHTTPRequest(is);
-			writeHTTPHeader(os, "text/html");
+			System.out.println("here");
+			writeHTTPHeader(os);
 			writeContent(os);
 			os.flush();
 			socket.close();
@@ -101,6 +118,7 @@ public class WebWorker implements Runnable
 	private void readHTTPRequest(InputStream is)
 	{
 		String line;
+		String extension;
 		boolean flag = false;
 		BufferedReader r = new BufferedReader(new InputStreamReader(is));
 		while (true)
@@ -110,14 +128,13 @@ public class WebWorker implements Runnable
 				while (!r.ready())
 					Thread.sleep(1);
 				line = r.readLine();
+				System.err.println("Request line: (" + line + ")");//request line 1 recieves whatever is typed into the web browser. //these lines will be useful for assignment.
 				if (!flag){
-					filePath = "C:/NMSU/CS 371 Software Development/Programs/SimpleWebServer" + line.substring(line.indexOf(' ') + 1,line.lastIndexOf(' '));
+					filePath = line.substring(line.indexOf(' ') + 2,line.lastIndexOf(' '));
 					flag = true;
-					System.out.println(filePath);
 				}
 
-				System.err.println("Request line: (" + line + ")");//request line 1 recieves whatever is typed into the web browser. //these lines will be useful for assignment.
-				if (line.length() == 0)
+					if (line.length() == 0)
 					break;
 			}
 			catch (Exception e)
@@ -137,22 +154,32 @@ public class WebWorker implements Runnable
 	 * @param contentType
 	 *          is the string MIME content type (e.g. "text/html")
 	 **/
-	private void writeHTTPHeader(OutputStream os, String contentType) throws Exception
-	{
+	private void writeHTTPHeader(OutputStream os) throws Exception
+	{	
 		Date d = new Date();
 		boolean fileFound = true;
 		DateFormat df = DateFormat.getDateTimeInstance();
 		df.setTimeZone(TimeZone.getTimeZone("GMT"));
 		try {
-			myFileHandler = new Scanner(new File(filePath));
-		} catch (FileNotFoundException e){
+			foundFile = new File(filePath);
+			fileLength = foundFile.length();
+			myFileHandler = new FileInputStream(foundFile);
+			System.out.println("We did find the file");
+		} catch (Exception e){
+			System.out.println("Failed to find file, defaulting to 404 page");
 			fileFound = false;
-			myFileHandler = new Scanner(new File("C:/NMSU/CS 371 Software Development/Programs/SimpleWebServer/res/acc/PageNotFound.html"));
+			foundFile = new File("res/acc/PageNotFound.html");
 		}
-		if(fileFound)
+		if(fileFound) //If the file was found, send a 200 status code and set the content type.
+		{
 			os.write("HTTP/1.1 200 OK\n".getBytes()); //Our code should 404 not found if the browser requests something that doesn't exist.
-		else 
+			setMime(filePath);
+		}
+		else //If file was not found, send a 404 status code and set content type to html.
+		{
 			os.write("HTTP/1.1 404 File Not Found\n".getBytes());
+			contentType = "text/html";
+		}
 
 		os.write("Date: ".getBytes());
 		os.write((df.format(d)).getBytes());
@@ -176,18 +203,57 @@ public class WebWorker implements Runnable
 	 **/
 	private void writeContent(OutputStream os) throws Exception
 	{
-		String unparsedLine = new String("");
-		while(myFileHandler.hasNextLine()) {
-			unparsedLine = myFileHandler.nextLine();
-			System.out.println(unparsedLine);
-			System.out.println(findTagAndReplace(unparsedLine));
 
-			os.write((findTagAndReplace(unparsedLine) + "\n").getBytes());
-		 }
+		if (contentType.equals("text/html")) //If the content type is html, write to the socket output stream one line at at time. This way, we can use findAndReplace()
+		{
+			String unparsedLine = new String("");
+			Scanner myScan = new Scanner(foundFile);
 
-		/*os.write("<html><head></head><body>\n".getBytes());
-		os.write("<h3>My web server works!</h3>\n".getBytes());
-		os.write("</body></html>\n".getBytes()); */
+		    while(myScan.hasNextLine()) {
+				unparsedLine = myScan.nextLine();
+				System.out.println(unparsedLine);
+				System.out.println(findTagAndReplace(unparsedLine));
+				os.write((findTagAndReplace(unparsedLine) + "\n").getBytes());
+		    }//end while
+		}//end if
+		else //If it is anything but html, use the FileInputStream to get raw binary data and put it into a byte array.
+		{
+			byte[] outputBytes = new byte[(int)fileLength];
+			myFileHandler.read(outputBytes); //outputBytes now contains the raw bytes of the file.
+			os.write(outputBytes); //Write the entire outputBytes array to the output stream.
+		}//end else
+
 	}
+
+	//Pre-condition: the file that is about to be served must actually exist or this method will break.
+	//Purpose: sets the content type depending on the file requested.
+	//Parameters: The line containing the filepath. Will grab the file extension from this line.
+	private void setMime(String line)
+	{
+		String extension = line.substring(line.indexOf('.')); //Grabs extension.
+		System.out.println(extension);
+		//If statement below sets contentType based on grabed extension.
+		if (extension.equals(".html"))
+		{
+			contentType = "text/html";
+		}
+		else if (extension.equals(".png"))
+		{
+			contentType = "image/png";
+		}
+		else if (extension.equals(".jpeg") || extension.equals(".jpg"))
+		{
+			contentType = "image/jpeg";
+		}
+		else if (extension.equals(".gif"))
+		{
+			contentType = "image/gif";
+		}
+		else if (extension.equals(".ico"))
+		{
+			contentType = "image/ico";
+		}
+
+	}//end method
 
 } // end class

@@ -1,0 +1,7 @@
+1. I estimate it will take me 4 hours to complete
+2. It took me 5 hours and 30 minutes to complete.
+	Thought/Design: 4 hours
+	Programming: 30 minutes
+	Debugging: 1 hour
+	TOTAL: 5 hours 30 minutes
+3. 37.5 percent

@@ -1,5 +1,0 @@
-<html><head></head><body>
-<h3>My web server works!</h3>
-The current date is: <cs371date>
-My Server name is: <cs371server>
-</body></html>
