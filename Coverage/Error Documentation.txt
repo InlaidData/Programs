@@ -1,0 +1,8 @@
+In RacingScore1.java:
+	The program is not properly adding up the correct two minimum scores. 
+	The problem lied in the fact that it was setting s to be the largest between score1 and score2, when it should have been the smallest.
+	The error has been corrected on line 44 and 42.
+In RacingScore2.java:
+	The program wasn't properly handling grabbing the two largest scores.
+	To fix, this, I changed all of the '<' to '<=' and removed the final else statement. The changed lines are listed
+	in the java source code document.

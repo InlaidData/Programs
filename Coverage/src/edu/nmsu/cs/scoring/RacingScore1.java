@@ -39,12 +39,14 @@ public class RacingScore1
 	{
 		int s;
 		if (score1 < score2)
-			s = score2;
+			s = score1; //Changed from score2
 		else
-			s = score1;
+			s = score2;
+
+		//At this point, s contains the smallest value between the score 1 and 2.
 		if (s > score3)
 			s = score3;
-		s = (score1 + score2 + score3) - s;
+		s = (score1 + score2 + score3) - s; //At this point, s is the smallest value between all three scores, subtract it from the total sum to get the two largest.
 		return s;
 	}
 
