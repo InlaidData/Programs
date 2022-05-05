@@ -1,1 +1,26 @@
-ECHO is on.
+<project default="compile">
+	<target name="compile">
+		<javac destdir="C:\NMSU\CS 371 Software Development\Programs\Circles\bin" srcdir="C:\NMSU\CS 371 Software Development\Programs\Circles\src">
+				<classpath>
+						<fileset dir="C:\NMSU\CS 371 Software Development\Programs\Circles\lib">
+							<include name="**/*.jar"/>
+						</fileset>
+				</classpath>
+		</javac>
+	</target>
+
+	<target name="testCircle1">
+		<java classpath="C:\NMSU\CS 371 Software Development\Programs\Circles\lib\junit-4.13.2.jar;C:\NMSU\CS 371 Software Development\Programs\Circles\bin;C:\NMSU\CS 371 Software Development\Programs\Circles\lib\hamcrest-core-1.3.jar" classname="org.junit.runner.JUnitCore" fork="true">
+				<arg value="edu.nmsu.cs.circles.Circle1Test"/>
+		</java>
+	</target>
+
+	<target name="testCircle2">
+		<java classpath="C:\NMSU\CS 371 Software Development\Programs\Circles\bin" classname="org.junit.runner.JUnitCore" fork="true">
+			<arg value="edu.nmsu.cs.circles.Circle2Test"/>
+		</java>
+	</target>
+
+	<target name="test" depends="testCircle1,testCircle2">
+	</target>
+</project>

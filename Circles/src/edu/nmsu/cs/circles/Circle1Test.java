@@ -35,6 +35,96 @@ public class Circle1Test
 		System.out.println("\nTest finished.");
 	}
 
+	@Test
+	//Sees the output when two circles do not Touch.
+	public void intersectNoIntersection(){
+
+			//One above another, not touching.
+			System.out.println("Test intersectNoIntersection: Top of each other.\n");
+			Circle1 baseCircle = new Circle1(0, 50, 10);
+			Circle1 secondCircle = new Circle1(0, 0, 5);
+			Assert.assertFalse(baseCircle.intersects(secondCircle));
+			Assert.assertFalse(baseCircle.intersects(baseCircle));
+
+			//Next to another. Not touching.
+			System.out.println("Test intersectNoIntersection: Side by side not touching\n");
+			baseCircle = new Circle1(0, 0, 10);
+			secondCircle = new Circle1(50, 0, 5);
+			Assert.assertFalse(baseCircle.intersects(secondCircle));
+			Assert.assertFalse(baseCircle.intersects(baseCircle));
+
+			//Next to another. barely missing each other.
+			System.out.println("Test intersectNoIntersection: almost touching\n");
+			baseCircle = new Circle1(0, 0, 10);
+			secondCircle = new Circle1(0.00000000001, 0, 5);
+			Assert.assertFalse(baseCircle.intersects(secondCircle));
+			Assert.assertFalse(baseCircle.intersects(baseCircle));
+
+			//One above another. barely missing each other.
+			System.out.println("Test intersectNoIntersection: Side by side not touching\n");
+			baseCircle = new Circle1(0, 10, 2.999999);
+			secondCircle = new Circle1(0, 5, 2);
+			Assert.assertFalse(baseCircle.intersects(secondCircle));
+			Assert.assertFalse(baseCircle.intersects(baseCircle));
+
+			//One above and to the right (diagonal, to make sure we arent testing bounding boxes.)
+			System.out.println("Test intersectNoIntersection: Diagonal Not Touching\n");
+			baseCircle = new Circle1(0, 0, 1);
+			secondCircle = new Circle1(1.421, 1.421, 1);
+			Assert.assertFalse(baseCircle.intersects(secondCircle));
+			Assert.assertFalse(baseCircle.intersects(baseCircle));
+	}
+
+	@Test
+	//Sees the output when two circles are the same size and overlap exactly.
+	public void intersectCompleteOverlap(){
+		System.out.println("Test intersectCompleteOverlap: Same Size\n");
+		//Intersect Overlap
+		Circle1 baseCircle = new Circle1(0, 0, 5);
+		Circle1 secondCircle = new Circle1(0, 0, 5);
+		Assert.assertTrue(baseCircle.intersects(secondCircle));
+		Assert.assertTrue(baseCircle.intersects(baseCircle));
+			
+	}
+
+	@Test
+	//Sees the output when two circles are the same size and overlap exactly.
+	public void intersectInside(){
+		//Base circle is smaller than second, they are inside one another.
+		System.out.println("Test intersectInside: Base Circle inside second circle.\n");
+		Circle1 baseCircle = new Circle1(0, 0, 5);
+		Circle1 secondCircle = new Circle1(0, 0, 10);
+		Assert.assertFalse(baseCircle.intersects(secondCircle));
+		Assert.assertFalse(baseCircle.intersects(baseCircle));
+
+		//Second circle is smaller than base circle, sees if there is an issue.
+		System.out.println("Test intersectInside: second Circle inside base circle.\n");
+		baseCircle = new Circle1(0, 0, 10);
+		secondCircle = new Circle1(0, 0, 5);
+		Assert.assertFalse(baseCircle.intersects(secondCircle));
+		Assert.assertFalse(baseCircle.intersects(baseCircle));
+	}
+
+	//Test a simple positive scale
+
+	@Test
+	public void simplePositiveScale(){
+		System.out.println("Test simplePositiveScale: scaling a unit circle by 0.8.\n");
+		Circle1 baseCircle = new Circle1(0, 0, 1);
+		baseCircle.scale(0.8);
+		Assert.assertTrue(baseCircle.radius == 0.8);
+	}//end method
+
+	//Test a simple negative scale
+
+	@Test
+	public void simpleNegativeScale(){
+		System.out.println("Test simpleNegativeScale: scaling a unit circle by -0.9.\n");
+		Circle1 baseCircle = new Circle1(0, 0, 1);
+		baseCircle.scale(-0.9);
+		Assert.assertTrue(baseCircle.radius == 0.9);
+	}//end method
+
 	//
 	// Test a simple positive move
 	//
