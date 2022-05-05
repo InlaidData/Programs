@@ -85,7 +85,7 @@ public class Circle1Test
 		Assert.assertTrue(baseCircle.intersects(secondCircle));
 		Assert.assertTrue(baseCircle.intersects(baseCircle));
 			
-	}
+	}//end method
 
 	@Test
 	//Sees the output when two circles are the same size and overlap exactly.
